@@ -2,39 +2,50 @@
 
 // Brute force throttling
 
-// IMPORTANT: The session is used for demonstration purposes only.
-// A hacker attempting a brute force attack would not bother to send
-// cookies, which would mean that you could not use the session
-// (which is referenced by a cookie).
-// In real life, use a real database.
-
 function record_failed_login($username) {
-	$failed_login = find_one_in_db('failed_logins', 'username', sql_prep($username));
 
-	if(!isset($failed_login)) {
-		$failed_login = [
-			'username' => sql_prep($username),
-			'count' => 1,
-			'last_time' => time()
-		];
-		add_record_to_db('failed_logins', $failed_login);
+	$db = DBAccess::getMysqliConnection();
+
+	$cleanEmail = mysqli_real_escape_string($db, $username);
+	$count = 1;
+	$last_time = time();
+
+	$failed_login = $db->query("SELECT * FROM failed_logins WHERE email='$cleanEmail'") or die($mysqli->error());
+
+	if($failed_login->num_rows < 1)
+	{
+
+		$sql = "INSERT INTO failed_logins (username, theCount, last_time)"
+						. "VALUES ('$cleanEmail', '$count', '$last_time')";
+
+		$db->query($sql);
+
 	} else {
 		// existing failed_login record
-		$failed_login['count'] = $failed_login['count'] + 1;
-		$failed_login['last_time'] = time();
-		update_record_in_db('failed_logins', 'username', $failed_login);
+		$count = $failed_login['theCount'] + 1;
+		$sql = "UPDATE failed_logins SET (theCount, last_time) WHERE email='$cleanEmail'"
+						. "VALUES ('$count', '$last_time')";
+		$db->query($sql);
 	}
 
 	return true;
 }
 
 function clear_failed_logins($username) {
-	$failed_login = find_one_in_db('failed_logins', 'username', sql_prep($username));
 
-	if(isset($failed_login)) {
-		$failed_login['count'] = 0;
-		$failed_login['last_time'] = time();
-		update_record_in_db('failed_logins', 'username', $failed_login);
+	$db = DBAccess::getMysqliConnection();
+
+	$cleanEmail = mysqli_real_escape_string($db, $username);
+	$count = 0;
+	$last_time = time();
+
+	$failed_login = $db->query("SELECT * FROM failed_logins WHERE email='$cleanEmail'") or die($mysqli->error());
+
+	if($failed_login->num_rows > 0) {
+
+		$sql = "UPDATE failed_logins SET (theCount, last_time) WHERE email='$cleanEmail'"
+						. "VALUES ('$count', '$last_time')";
+		$db->query($sql);
 	}
 
 	return true;
@@ -47,11 +58,15 @@ function throttle_failed_logins($username) {
 	$delay_in_minutes = 10;
 	$delay = 60 * $delay_in_minutes;
 
-	$failed_login = find_one_in_db('failed_logins', 'username', sql_prep($username));
+	$db = DBAccess::getMysqliConnection();
+
+	$cleanEmail = mysqli_real_escape_string($db, $username);
+
+	$failed_login = $db->query("SELECT * FROM failed_logins WHERE email='$cleanEmail'") or die($mysqli->error());
 
 	// Once failure count is over $throttle_at value,
 	// user must wait for the $delay period to pass.
-	if(isset($failed_login) && $failed_login['count'] >= $throttle_at) {
+	if($failed_login->num_rows > 0 && $failed_login['theCount'] >= $throttle_at) {
 		$remaining_delay = ($failed_login['last_time'] + $delay) - time();
 		$remaining_delay_in_minutes = ceil($remaining_delay / 60);
 		return $remaining_delay_in_minutes;
