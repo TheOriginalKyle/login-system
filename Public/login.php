@@ -6,7 +6,7 @@
 /* User login process, checks if user exists and password is correct */
 $db = DBAccess::getMysqliConnection();
 
-// Escape email to protect against SQL injections
+// Grab and trim the inputs
 $dirtyEmail = trim($_POST['email']);
 $dirtyPassword = trim($_POST['password']);
 
@@ -30,11 +30,10 @@ if(has_presence($dirtyEmail) && has_presence($dirtyPassword))
     {
       //ALLWAYS sanitize your inputs we don't want people breaking the page on purpose.
       $noHTMLemail = h($dirtyEmail);
-      if(filter_var($noHTMLEmail, FILTER_VALIDATE_EMAIL) && has_format_matching($dirtyPassword, '/[^A-Za-z0-9]/'))
+      if(filter_var($noHTMLemail, FILTER_VALIDATE_EMAIL) && has_format_matching($dirtyPassword, '/[^A-Za-z0-9]/'))
       {
-        $cleanEmail = mysqli_real_escape_string($db, $noHTMLEmail);
-        //valid as in the format is correct and has not been escaped.
-        $validPassword = $diryPassword;
+        $cleanEmail = mysqli_real_escape_string($db, $noHTMLemail);
+        $validPassword = $dirtyPassword
 
         //Okay so we validated and sanitized the input lets see if their credentials check out.
         $result = $db->query("SELECT * FROM users WHERE email='$cleanEmail'");
@@ -50,7 +49,7 @@ if(has_presence($dirtyEmail) && has_presence($dirtyPassword))
           $user = $result->fetch_assoc();
 
           //The escape string is only because we did that on the register page.
-          if ( password_verify(mysqli_real_escape_string($db, $validPassword), $user['password']) )
+          if ( password_verify($validPassword, $user['password']) )
           {
             //Lets put everything in the user session.
             $_SESSION['email'] = $user['email'];
@@ -71,7 +70,7 @@ if(has_presence($dirtyEmail) && has_presence($dirtyPassword))
           {
             //They passed all the checks just the password wasn't correct.
             record_failed_login($cleanEmail);
-            $_SESSION['message'] = "You have entered in the wrong combination, try again!";
+            $_SESSION['message'] = "1You have entered in the wrong combination, try again!";
             header("location: error.php");
           }
         }
@@ -80,7 +79,7 @@ if(has_presence($dirtyEmail) && has_presence($dirtyPassword))
       {
         //They didn't give us valid input, I'd tell them but what if they're malicious?
         record_failed_login(mysqli_real_escape_string($db, $noHTMLemail));
-        $_SESSION['message'] = "You have entered in the wrong combination, try again!";
+        $_SESSION['message'] = "2You have entered in the wrong combination, try again!";
         header("location:error.php");
       }
     }
@@ -89,7 +88,7 @@ if(has_presence($dirtyEmail) && has_presence($dirtyPassword))
       //They didn't give us any input thats remotely valid.
       //Ima go with malicious or they accidentally hit enter.
       record_failed_login(mysqli_real_escape_string($db, $dirtyEmail));
-      $_SESSION['message'] = "You have entered in the wrong combination, try again!";
+      $_SESSION['message'] = "3You have entered in the wrong combination, try again!";
       header("location:error.php");
     }
   }
@@ -98,6 +97,6 @@ else
 {
   //This is blank input. Like what am I supposed to do with that?!?
   record_failed_login(mysqli_real_escape_string($db, $dirtyEmail));
-  $_SESSION['message'] = "You have entered in the wrong combination, try again!";
+  $_SESSION['message'] = "4You have entered in the wrong combination, try again!";
   header("location: error.php");
 }
