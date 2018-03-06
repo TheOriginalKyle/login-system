@@ -2,57 +2,81 @@
 
 // Brute force throttling
 
-// IMPORTANT: The session is used for demonstration purposes only.
-// A hacker attempting a brute force attack would not bother to send 
-// cookies, which would mean that you could not use the session 
-// (which is referenced by a cookie).
-// In real life, use a real database.
-
+//They gave us some input but it didn't check out. We should write that down.
 function record_failed_login($username) {
-	$failed_login = find_one_in_fake_db('failed_logins', 'username', sql_prep($username));
 
-	if(!isset($failed_login)) {
-		$failed_login = [
-			'username' => sql_prep($username), 
-			'count' => 1, 
-			'last_time' => time()
-		];
-		add_record_to_fake_db('failed_logins', $failed_login);
+	//Lets give ourselves access to our database.
+	$db = DBAccess::getMysqliConnection();
+
+	//Sanitizing the input because what if these guys had malicious intent?
+	$cleanEmail = mysqli_real_escape_string($db, $username);
+	$count = 1;
+	$last_time = time();
+
+	//Lets see if they tried that username before.
+	$failed_login = $db->query("SELECT * FROM failed_logins WHERE email='$cleanEmail'") or die($mysqli->error());
+
+	//They never tried that username before.
+	if($failed_login->num_rows < 1)
+	{
+
+		$sql = "INSERT INTO failed_logins (email, theCount, last_time)"
+						. "VALUES ('$cleanEmail', '$count', '$last_time')";
+
+		$db->query($sql);
+
 	} else {
 		// existing failed_login record
-		$failed_login['count'] = $failed_login['count'] + 1;
-		$failed_login['last_time'] = time();
-		update_record_in_fake_db('failed_logins', 'username', $failed_login);
+		$sqlArray = $failed_login->fetch_array(MYSQLI_ASSOC);
+		$count = $sqlArray['theCount'] + 1;
+		$sql = "UPDATE failed_logins SET theCount='$count', last_time='$last_time' WHERE email='$cleanEmail'";
+		$db->query($sql);
 	}
-	
+
 	return true;
 }
 
+//They either forgot their password or the hacker one either way gg.
 function clear_failed_logins($username) {
-	$failed_login = find_one_in_fake_db('failed_logins', 'username', sql_prep($username));
 
-	if(isset($failed_login)) {
-		$failed_login['count'] = 0;
-		$failed_login['last_time'] = time();
-		update_record_in_fake_db('failed_logins', 'username', $failed_login);
+	$db = DBAccess::getMysqliConnection();
+
+	$cleanEmail = mysqli_real_escape_string($db, $username);
+	$count = 0;
+	$last_time = time();
+
+	$failed_login = $db->query("SELECT * FROM failed_logins WHERE email='$cleanEmail'") or die($mysqli->error());
+
+	//We should probably check that we wrote the attempt down.
+	if($failed_login->num_rows > 0) {
+
+		//Good news? We did.
+		$sql = "UPDATE failed_logins SET (theCount, last_time) WHERE email='$cleanEmail'"
+						. "VALUES ('$count', '$last_time')";
+		$db->query($sql);
 	}
-	
+
 	return true;
 }
 
-// Returns the number of minutes to wait until logins 
+// Returns the number of minutes to wait until logins
 // are allowed again.
 function throttle_failed_logins($username) {
 	$throttle_at = 5;
 	$delay_in_minutes = 10;
 	$delay = 60 * $delay_in_minutes;
-	
-	$failed_login = find_one_in_fake_db('failed_logins', 'username', sql_prep($username));
 
-	// Once failure count is over $throttle_at value, 
+	$db = DBAccess::getMysqliConnection();
+
+	$cleanEmail = mysqli_real_escape_string($db, $username);
+
+	$failed_login = $db->query("SELECT * FROM failed_logins WHERE email='$cleanEmail'") or die($mysqli->error());
+	$sqlArray = $failed_login->fetch_array(MYSQLI_ASSOC);
+
+	// Once failure count is over $throttle_at value,
 	// user must wait for the $delay period to pass.
-	if(isset($failed_login) && $failed_login['count'] >= $throttle_at) {
-		$remaining_delay = ($failed_login['last_time'] + $delay) - time();
+	if($failed_login->num_rows >= 1 && $sqlArray['theCount'] >= $throttle_at) {
+		$remaining_delay = ($sqlArray['last_time'] + $delay) - time();
 		$remaining_delay_in_minutes = ceil($remaining_delay / 60);
 		return $remaining_delay_in_minutes;
 	} else {
