@@ -57,41 +57,54 @@ if(has_presence($dirtyEmail) && has_presence($dirtyFirstName) && has_presence($d
               #The password is now clean now we may continue.
               register_user($cleanFirstName, $cleanLastName, $cleanEmail, $cleanPassword, $hash);
 
-            }else{
-              $_SESSION['message'] = 'Your password is not strong enought.';
+            }
+            else
+            {
+              $_SESSION['message'] = 'Your password is not strong enough.';
               header("location: error.php");
             }
 
-          }else{
+          }
+          else
+          {
             $_SESSION['message'] = 'Your password is not strong enough.';
             header("location: error.php");
           }
 
-        }else{
+        }
+        else
+        {
           $_SESSION['message'] = 'Your name is too short.';
           header("location: error.php");
         }
 
-      }else{
+      }
+      else
+      {
         $_SESSION['message'] = 'Your name is too short.';
         header("location: error.php");
       }
 
-    }else{
-      $_SESSION['message'] = 'Thants not a real email.';
+    }
+    else
+    {
+      $_SESSION['message'] = 'Thats not a real email.';
       header("location: error.php");
 
       var_dump($noHTMLemail);
     }
 
-  }else{
+  }
+  else
+  {
     $_SESSION['message'] = 'Thats not a real email.';
     header("location: error.php");
 
     var_dump($dirtyEmail);
   }
 
-}else
+}
+else
 {
   $_SESSION['message'] = 'You forgot to enter something in!';
   header("location: error.php");
@@ -114,40 +127,42 @@ if(has_presence($dirtyEmail) && has_presence($dirtyFirstName) && has_presence($d
 // $password = $mysqli->escape_string(password_hash($_POST['password'], PASSWORD_BCRYPT));
 // $hash = $mysqli->escape_string( md5( rand(0,1000) ) );
 
-function register_user($cleanFirstName,$cleanLastName,$cleanEmail,$cleanPassword,$hash){
-$db = DBAccess::getMysqliConnection();
+function register_user($cleanFirstName,$cleanLastName,$cleanEmail,$cleanPassword,$hash)
+{
+  $db = DBAccess::getMysqliConnection();
 
-// Check if user with that email already exists
-$result = $db->query("SELECT * FROM users WHERE email='$cleanEmail'") or die($mysqli->error());
+  // Check if user with that email already exists
+  $result = $db->query("SELECT * FROM users WHERE email='$cleanEmail'") or die($mysqli->error());
 
-// We know user email exists if the rows returned are more than 0
-if ( $result->num_rows > 0 ) {
-
+  // We know user email exists if the rows returned are more than 0
+  if ( $result->num_rows > 0 )
+  {
     $_SESSION['message'] = 'User with this email already exists!';
     header("location: error.php");
 
-}
-else { // Email doesn't already exist in a database, proceed...
+  }
+  else
+  {
+    // Email doesn't already exist in a database, proceed...
 
     // active is 0 by DEFAULT (no need to include it here)
     $sql = "INSERT INTO users (first_name, last_name, email, password, hash) "
             . "VALUES ('$cleanFirstName','$cleanLastName','$cleanEmail','$cleanPassword', '$hash')";
 
     // Add user to the database
-    if ( $db->query($sql) ){
+    if ( $db->query($sql) )
+    {
+      $_SESSION['active'] = 0; //0 until user activates their account with verify.php
+      $_SESSION['logged_in'] = true; // So we know the user has logged in
 
-        $_SESSION['active'] = 0; //0 until user activates their account with verify.php
-        $_SESSION['logged_in'] = true; // So we know the user has logged in
-
-
-
-        header("location: profile.php");
+      header("location: profile.php");
 
     }
 
-    else {
-        $_SESSION['message'] = 'Registration failed!';
-        header("location: error.php");
+    else
+    {
+      $_SESSION['message'] = 'Registration failed!';
+      header("location: error.php");
     }
 
 }

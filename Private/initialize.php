@@ -20,7 +20,7 @@ require_once(PRIVATE_PATH . "/functions/csrf_token_functions.php");
 require_once(PRIVATE_PATH . "/functions/request_forgery_functions.php");
 require_once(PRIVATE_PATH . "/functions/session_hijacking_functions.php");
 require_once(PRIVATE_PATH . "/functions/sqli_escape_functions.php");
-//require_once(PRIVATE_PATH . "/functions/throttle_functions.php");
+require_once(PRIVATE_PATH . "/functions/throttle_functions.php");
 require_once(PRIVATE_PATH . "/functions/validation_functions.php");
 require_once(PRIVATE_PATH . "/functions/xss_sanitize_functions.php");
 
