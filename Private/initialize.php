@@ -5,8 +5,8 @@
 // Set constants to easily reference public
 // and private directories
 define("APP_ROOT", dirname(dirname(__FILE__)));
-define("PRIVATE_PATH", APP_ROOT . "/private");
-define("PUBLIC_PATH", APP_ROOT . "/public");
+define("PRIVATE_PATH", APP_ROOT . "/Private");
+define("PUBLIC_PATH", APP_ROOT . "/Public");
 
 session_start();
 

@@ -30,7 +30,7 @@ class DBAccess {
     }
 
     private static function getDBCredentials() {
-        $dbAccessFilePath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT') . '/login-system2/Private/access/access.csv';
+        $dbAccessFilePath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT') . '/login-system/Private/access/access.csv';
         $dbAccessFile = fopen($dbAccessFilePath, 'rb');
         $dbAccessParams = fgetcsv($dbAccessFile, 0, ",");
         fclose($dbAccessFile);

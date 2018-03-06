@@ -1,6 +1,6 @@
 
 
-<?php require_once("../private/initialize.php"); ?>
+<?php require_once("../Private/initialize.php"); ?>
 
 <?php
 /* Displays all successful messages */

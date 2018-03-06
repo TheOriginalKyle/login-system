@@ -1,5 +1,5 @@
 
-<?php require_once("../private/initialize.php"); ?>
+<?php require_once("../Private/initialize.php"); ?>
 
 
 
@@ -29,7 +29,7 @@ confirm_user_logged_in();
 
           <h1>Welcome</h1>
 
-        
+
 
 
 

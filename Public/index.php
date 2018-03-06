@@ -1,6 +1,4 @@
-<?php require_once("../Private/initialize.php"); ?>
-
-
+<?php require_once "../Private/initialize.php"; ?>
 
 
 <!DOCTYPE html>
@@ -53,17 +51,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
              <?php echo csrf_token_tag(); ?>
 
             <div class="field-wrap">
-            <label>
+            <label id="email">
               Email Address<span class="req">*</span>
             </label>
-            <input type="email" required autocomplete="off" name="email"   />
+            <input id="emailInput" type="email" required autocomplete="off" name="email" oninput="removeLabel('email','Email Address')"  />
           </div>
 
           <div class="field-wrap">
-            <label>
+            <label id="password">
               Password<span class="req">*</span>
             </label>
-            <input type="password" required autocomplete="off" name="password"/>
+            <input id="passwordInput" type="password" required autocomplete="off" name="password" oninput="removeLabel('password', 'Password')"/>
           </div>
 
 
@@ -78,6 +76,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
       </div><!-- tab-content -->
 
 </div> <!-- /form -->
-
+<script>
+  function removeLabel(labelName,theLabel)
+  {
+    if(document.getElementById(labelName).innerHTML != "")
+    {
+      document.getElementById(labelName).innerHTML="";
+    }else if(document.getElementById(labelName + "Input").value == 0) {
+      document.getElementById(labelName).innerHTML=theLabel;
+    }
+  }
+</script>
 </body>
 </html>

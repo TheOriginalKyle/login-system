@@ -1,1 +1,1 @@
-mysql:host=localhost;dbname=accounts;port=3306,localhost,dbuser,password,accounts,3306
+mysql:host=localhost;dbname=accounts;port=3306,localhost,root,Rycbar1235!,accounts,3306
