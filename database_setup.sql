@@ -17,6 +17,6 @@ CREATE TABLE `accounts`.`failed_logins`
     `id` INT NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(100) NOT NULL,
     `theCount` INT NOT NULL DEFAULT 1,
-    `last_time` TIME NOT NULL,
+    `last_time` INT NOT NULL,
  PRIMARY KEY (`id`)
  );
