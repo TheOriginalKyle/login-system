@@ -33,7 +33,7 @@ if(has_presence($dirtyEmail) && has_presence($dirtyPassword))
       if(filter_var($noHTMLemail, FILTER_VALIDATE_EMAIL) && has_format_matching($dirtyPassword, '/[^A-Za-z0-9]/'))
       {
         $cleanEmail = mysqli_real_escape_string($db, $noHTMLemail);
-        $validPassword = $dirtyPassword
+        $validPassword = $dirtyPassword;
 
         //Okay so we validated and sanitized the input lets see if their credentials check out.
         $result = $db->query("SELECT * FROM users WHERE email='$cleanEmail'");
