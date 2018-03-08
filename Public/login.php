@@ -60,6 +60,8 @@ if(has_presence($dirtyEmail) && has_presence($dirtyPassword))
             //Lets clear the failed attempts as it looks like somebody forgot their password.
             //or worse.
             clear_failed_logins($cleanEmail);
+            after_successful_login();
+
 
             // This is how we'll know the user is logged in
             $_SESSION['logged_in'] = true;
